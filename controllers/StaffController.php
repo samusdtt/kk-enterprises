@@ -6,7 +6,10 @@ class StaffController extends Controller
     public function presentOrders(): void
     {
         $this->requireRole(['staff']);
-        $orders = Order::allByCategoryForDate();
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT o.* FROM orders o JOIN staff_delivery_logs s ON s.order_id = o.id WHERE s.staff_id = ? AND DATE(o.created_at) = CURDATE() ORDER BY o.category, o.id DESC');
+        $stmt->execute([(int)$_SESSION['user']['id']]);
+        $orders = $stmt->fetchAll();
         $this->view('staff/present_orders', compact('orders'));
     }
 
@@ -16,6 +19,17 @@ class StaffController extends Controller
         $orderId = (int)($_POST['order_id'] ?? 0);
         if ($orderId) {
             Order::updateStatus($orderId, 'delivered');
+            $pdo = Database::getConnection();
+            $check = $pdo->prepare('SELECT id FROM staff_delivery_logs WHERE staff_id = ? AND order_id = ? LIMIT 1');
+            $check->execute([(int)$_SESSION['user']['id'], $orderId]);
+            $existing = $check->fetch();
+            if ($existing) {
+                $upd = $pdo->prepare('UPDATE staff_delivery_logs SET delivered_at = NOW() WHERE id = ?');
+                $upd->execute([(int)$existing['id']]);
+            } else {
+                $ins = $pdo->prepare('INSERT INTO staff_delivery_logs (staff_id, order_id, delivered_at, paid_verified) VALUES (?, ?, NOW(), 0)');
+                $ins->execute([(int)$_SESSION['user']['id'], $orderId]);
+            }
         }
         $this->redirect('/staff/present-orders');
     }
