@@ -115,14 +115,22 @@ class AdminController extends Controller
         $this->requireRole(['admin']);
         $pdo = Database::getConnection();
         $date = $_POST['record_date'] ?? date('Y-m-d');
-        $stmt = $pdo->prepare('INSERT INTO jar_records (record_date, total_jars, refilling, empty, onboard) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_jars = VALUES(total_jars), refilling = VALUES(refilling), empty = VALUES(empty), onboard = VALUES(onboard)');
-        $stmt->execute([
-            $date,
-            (int)($_POST['total_jars'] ?? 0),
-            (int)($_POST['refilling'] ?? 0),
-            (int)($_POST['empty'] ?? 0),
-            (int)($_POST['onboard'] ?? 0),
-        ]);
+        $total = (int)($_POST['total_jars'] ?? 0);
+        $refilling = (int)($_POST['refilling'] ?? 0);
+        $empty = (int)($_POST['empty'] ?? 0);
+        $onboard = (int)($_POST['onboard'] ?? 0);
+
+        // Manual upsert because schema has no unique index on record_date
+        $check = $pdo->prepare('SELECT id FROM jar_records WHERE record_date = ? LIMIT 1');
+        $check->execute([$date]);
+        $existing = $check->fetch();
+        if ($existing) {
+            $upd = $pdo->prepare('UPDATE jar_records SET total_jars = ?, refilling = ?, empty = ?, onboard = ? WHERE id = ?');
+            $upd->execute([$total, $refilling, $empty, $onboard, (int)$existing['id']]);
+        } else {
+            $ins = $pdo->prepare('INSERT INTO jar_records (record_date, total_jars, refilling, empty, onboard) VALUES (?, ?, ?, ?, ?)');
+            $ins->execute([$date, $total, $refilling, $empty, $onboard]);
+        }
         $this->redirect('/admin/jars?date=' . urlencode($date));
     }
 }
