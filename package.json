@@ -1,0 +1,12 @@
+{
+  "name": "kk-enterprises-water-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i ./public/assets/tailwind.css -o ./public/assets/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.10"
+  }
+}
+
