@@ -15,12 +15,15 @@
    - PHP built-in server (dev only):
      - cd public && php -S 0.0.0.0:8000
 
+<<<<<< feature/docker-tailwind
 ## Docker (recommended quick start)
 ```bash
 docker compose up --build -d
 # App: http://localhost:8080  |  MySQL: localhost:3306 (root/secret)
 ```
 
+=======
+>>>>>> main
 ## Default Flow
 - Visit /login
 - Create users directly in DB (roles: client, staff, admin). Passwords must be bcrypt hashes; or use registration via a quick SQL insert:

@@ -7,11 +7,15 @@ $user = $_SESSION['user'] ?? null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KK Enterprises – Water Management App</title>
+<<<<<< feature/docker-tailwind
     <?php if (file_exists(__DIR__ . '/../public/assets/app.css')): ?>
         <link rel="stylesheet" href="/assets/app.css" />
     <?php else: ?>
         <script src="https://cdn.tailwindcss.com"></script>
     <?php endif; ?>
+=======
+    <script src="https://cdn.tailwindcss.com"></script>
+>>>>>> main
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
     <header class="bg-white border-b sticky top-0 z-10">
